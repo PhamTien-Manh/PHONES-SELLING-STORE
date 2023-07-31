@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:insert="index.html :: head"></head>
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+</head>
+<body>
+
+<!-- ======= Header ======= -->
+<header th:insert="index.html :: header"></header>
+
+<!-- ======= Sidebar ======= -->
+<aside th:insert="index.html :: aside"></aside>
+
+  <main id="main" ng-app="app" ng-controller="ctrl" class="main">
+    <div class="pagetitle">
+      <h1>Loại hàng</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="../index.html">Quản lý</a></li>
+          <li class="breadcrumb-item active">Loại hàng</li>
+        </ol>
+      </nav>
+    </div><!-- End Page Title -->
+
+    <section class="section profile">
+      <div class="row container">
+        <div class="col-5 bg-white rounded shadow row m-1 p-4">
+          <form class="row border-bottom" action="/admin/categories/search" method="post">
+            <input class="form-control" type="text" placeholder="Search by name" name="keyword">
+            <button class="btn btn-secondary col-lg-4 mt-2 mb-3">Search</button>
+          </form>
+            <form action="/admin/categories/update-or-create" class="row p-3" method="post"
+                  path="*" element="div" delimiter=";">
+              <strong class="col-12">ID:</strong>
+              <input class="col-12 form-control" type="text" readonly placeholder="#ID">
+              <strong class="col-12">Tên loại:</strong>
+              <input class="col-12 form-control" type="text" placeholder="Tên loại">
+              <button class="btn btn-success mt-2 col-lg-4" type="submit">Submit</button>
+            </form>
+        </div>
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-body m-2">
+              <table class="table table-hover table-striped">
+                <thead>
+                <tr>
+                  <th>IDDD</th>
+                  <th>Tên loại</th>
+                  <th>Điều</th>
+                </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="category in items">
+                    <td>{{category.categoryId}}</td>
+                    <td>{{category.name}}</td>
+                    <td>
+                        <button ng-click="edit(category.email)">Edit</button>
+                        <button ng-click="delete(category.email)">Delete</button>
+                    </td>
+                </tr>
+                </tbody>
+              </table>
+<!--                <a class="btn btn-dark" th:href="@{/admin/categories(page=0,keyword=${keyword})}">&laquo;</a>-->
+<!--                &lt;!&ndash;  Toán tử 3 ngôi: nếu page = -1 thì trả lại page = 0 và ngược lại lớn hơn tổng số trang thì trả về trang lớn nhất&ndash;&gt;-->
+<!--                <a class="btn btn-dark" th:href="@{/admin/categories-->
+<!--      (page=${categorys.number - 1 < 0 ? 0 : categorys.number - 1},keyword=${keyword})}">Prev</a>-->
+<!--                <a class="btn btn-dark" th:href="@{/admin/categories-->
+<!--      (page=${categorys.number + 1 > categorys.totalPages - 1 ? categorys.totalPages - 1 : categorys.number + 1},keyword=${keyword})}">Next</a>-->
+<!--                <a class="btn btn-dark" th:href="@{/admin/categories(page=${categorys.totalPages - 1},keyword=${keyword})}">&raquo</a>-->
+            </div>
+              <!-- End Table with stripped rows -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+<footer th:insert="index.html :: footer"></footer>
+<a href="#" class="back-to-top d-flex align-categories-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+<div th:insert="index.html :: script"></div>
+<script>
+  let host = "http://localhost:8080/rest";
+const app = angular.module("app", []);
+app.controller("ctrl", function($scope, $http){
+    $scope.form = {}
+    $scope.items = []
+    $scope.reset = function(){
+        $scope.form = {gender: true, country:'VN'};
+    }
+    $scope.load_all = function(){
+        var url = `${host}/admin/categories`;
+        $http.get(url).then(resp => {
+            $scope.items = resp.data;
+            console.log("Success", resp);
+        }).catch(error => {
+            console.log("Error", error)
+        });
+    }
+    $scope.load_all();
+  })
+</script>
+</body>
+</html>

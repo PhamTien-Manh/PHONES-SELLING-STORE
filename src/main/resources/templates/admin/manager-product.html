@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:insert="index.html :: head"></head>
+<body>
+
+<!-- ======= Header ======= -->
+<header th:insert="index.html :: header"></header>
+
+<!-- ======= Sidebar ======= -->
+<aside th:insert="index.html :: aside"></aside>
+
+  <main id="main" class="main">
+
+    <div class="pagetitle">
+      <h1>Sản phẩm</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="../index.html">Quản lý</a></li>
+          <li class="breadcrumb-item active">Sản phẩm</li>
+        </ol>
+      </nav>
+    </div><!-- End Page Title -->
+
+    <section class="section profile">
+      <div class="row container">
+        <div class="col-lg-12">
+          <div class="card p-3">
+            <form class="border-bottom row" action="/admin/products/search" method="post">
+              <div class="col-lg-7 p-3">
+                <input class="form-control" type="text" placeholder="Search by name" th:value="${keyword}" name="keyword">
+              </div>
+              <button class="btn col-xl-2 btn-secondary mt-3 mb-3">Search</button>
+            </form>
+            <form action="/admin/products/update-or-create" th:object="${product}" class="row m-4" method="post"
+              enctype="multipart/form-data">
+<!--          Phòng trường hợp edit bị mất id và không thay đổi hình-->
+              <input type="hidden" th:field="*{productId}">
+              <input type="hidden" th:field="*{image}">
+              <div class="col-lg-6 form-group p-2">
+                <strong>Name:</strong>
+                <input class="form-control mb-2" th:field="*{name}" type="text" placeholder="Name">
+                <small class="text-danger mb-1 col-12" th:errors="*{name}"></small> <br>
+                  <strong>Price:</strong>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">$</span>
+                  </div>
+                  <input class="form-control mb-2" th:field="*{unitPriceSt}" type="text" placeholder="Price">
+                    <div class="input-group-append">
+                      <span class="input-group-text">VNĐ</span>
+                    </div>
+                  <small class="text-danger mb-1 col-12" th:errors="*{unitPrice}"></small>
+                </div>
+                <strong>Discount:</strong>
+                <div class="input-group">
+                  <input class="form-control mb-2" th:field="*{discount}" type="text" placeholder="Discount">
+                  <div class="input-group-append">
+                    <span class="input-group-text">%</span>
+                  </div>
+                  <small class="text-danger mb-1 col-12" th:errors="*{discount}"></small>
+                </div>
+                  <strong>Category:</strong>
+                <select class="form-control mb-2" th:field="*{category.categoryId}">
+                  <option th:each="categorie : ${categories}" th:value="${categorie.categoryId}" th:text="${categorie.name}"></option>
+                </select>
+              </div>
+              <div class="col-lg-6 form-group p-2">
+                <strong>Image:</strong>
+                <img th:src="${product.image != null ? '/admin/products/images/' + product.image : '' }"
+                     id="imagePreview" class="rounded" width="40%">
+                <input class="form-control mt-2" onchange="displayImage()" id="myFile" name="imageFile" type="file">
+              </div>
+              <div class="col-lg-12 form-group p-2">
+                <strong>Description:</strong>
+                <input class="form-control" th:field="*{description}" type="text" placeholder="Description">
+                  <small class="text-danger mb-1 col-12" th:errors="*{description}"></small>
+              </div>
+              <div class="col-lg-12 p-2 row m-1">
+                <button class="btn btn-success col-lg-2">Submit</button>
+                  <h5 class="text-primary pt-1 col"><strong th:text="${message}"></strong></h5>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="col-lg-12">
+          <div class="card">
+            <div class="card-body m-2">
+              <table class="table table-hover table-striped">
+                <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Price</th>
+                  <th>Discount</th>
+                  <th>Category</th>
+                  <th>Image</th>
+                  <th>Control</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product : ${products}">
+                  <td width="30%" th:text="${product.name}"></td>
+                    <td width="20%" th:inline="text">[[${#numbers.formatDecimal(product.unitPrice, 0, 'COMMA', 0, 'POINT')}]]₫</td></td>
+                  <td width="5%" th:text="${product.discount} + ' %'"></td>
+                  <td width="15%" th:text="${product.category.name}"></td>
+                  <td width="15%">
+                      <img th:src="${product.image != null ? '/admin/products/images/' + product.image : '' }"
+                      class="rounded" width="50%">
+                  </td>
+                  <td width="20%">
+                    <a th:href="@{/admin/products/edit(id=${product.productId},keyword=${keyword})}" class="btn btn-outline-success"><i class="bi bi-pencil-fill"></i></a>
+                    <a th:href="@{/admin/products/delete(id=${product.productId})}" class="btn btn-outline-danger"><i class="bi bi-trash3"></i></a>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+              <a class="btn btn-dark" th:href="@{/admin/products(page=0,keyword=${keyword})}">&laquo;</a>
+              <!--  Toán tử 3 ngôi: nếu page = -1 thì trả lại page = 0 và ngược lại lớn hơn tổng số trang thì trả về trang lớn nhất-->
+              <a class="btn btn-dark" th:href="@{/admin/products
+      (page=${products.number - 1 < 0 ? 0 : products.number - 1},keyword=${keyword})}">Prev</a>
+              <a class="btn btn-dark" th:href="@{/admin/products
+      (page=${products.number + 1 > products.totalPages - 1 ? products.totalPages - 1 : products.number + 1},keyword=${keyword})}">Next</a>
+              <a class="btn btn-dark" th:href="@{/admin/products(page=${products.totalPages - 1},keyword=${keyword})}">&raquo</a>
+            </div>
+              <!-- End Table with stripped rows -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+<footer th:insert="index.html :: footer"></footer>
+
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script th:src="@{~/assets/vendor/apexcharts/apexcharts.min.js}"></script>
+  <script th:src="@{~/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+  <script th:src="@{~/assets/vendor/chart.js/chart.umd.js}"></script>
+  <script th:src="@{~/assets/vendor/echarts/echarts.min.js}"></script>
+  <script th:src="@{~/assets/vendor/quill/quill.min.js}"></script>
+  <script th:src="@{~/assets/vendor/simple-datatables/simple-datatables.js}"></script>
+  <script th:src="@{~/assets/vendor/tinymce/tinymce.min.js}"></script>
+  <script th:src="@{~/assets/vendor/php-email-form/validate.js}"></script>
+
+  <!-- Template Main JS File -->
+  <script th:src="@{~/assets/js/main.js}"></script>
+
+<!--Upload file-->
+<script>
+  function displayImage() {
+    var fileInput = document.getElementById("myFile");
+    var imagePreview = document.getElementById("imagePreview");
+    if (fileInput.files && fileInput.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        imagePreview.style.display = "block";
+        imagePreview.src = e.target.result;
+      }
+      reader.readAsDataURL(fileInput.files[0]);
+    }
+  }
+</script>
+</body>
+
+</html>

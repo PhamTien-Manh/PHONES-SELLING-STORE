@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:insert="index.html :: head"></head>
+<body>
+
+<!-- ======= Header ======= -->
+<header th:insert="index.html :: header"></header>
+
+<!-- ======= Sidebar ======= -->
+<aside th:insert="index.html :: aside"></aside>
+
+  <main id="main" class="main">
+
+    <div class="pagetitle">
+      <h1>Lịch sử mua hàng</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a th:href="@{~/index}">Home</a></li>
+          <li class="breadcrumb-item active">Lịch sử</li>
+        </ol>
+      </nav>
+    </div><!-- End Page Title -->
+
+
+    <section class="section dashboard">
+      <div class="row">
+        <div class="col-lg-12" th:if="${orderDetails != null}">
+          <div class="card">
+            <div class="card-body m-2">
+              <table class="table table-hover table-borderless">
+                <thead>
+                <tr>
+                  <th>Tên</th>
+                  <th>Hình ảnh</th>
+                  <th>Đơn giá</th>
+                  <th>Số lượng</th>
+                  <th>Thành tiền</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${orderDetails}">
+                  <form>
+                  <td width="20%" th:text="${item.product.name}"></td>
+                  <td width="20%">
+                    <img th:src="${item.product.image != null ? '/cart/images/' + item.product.image : '' }"
+                         class="rounded" width="70%">
+                  </td>
+                  <td width="15%" th:inline="text">[[${#numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 0, 'POINT')}]]₫</td></td>
+                  <td width="10%" th:text="${item.quantity}"></td>
+                  <td width="20%" th:inline="text">[[${#numbers.formatDecimal(item.unitPrice * item.quantity, 0, 'COMMA', 0, 'POINT')}]]₫</td></td>
+                  </form>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- End Table with stripped rows -->
+            <div class="card-footer bg-light d-flex justify-content-end">
+              <h5 class="card-title" th:inline="text">Tổng tiền: [[${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')}]]₫</h5>
+            </div>
+            </div>
+          </div>
+        <div class="col-lg-12">
+          <div class="card">
+            <div class="card-body m-2">
+              <table class="table table-hover table-borderless">
+                <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Số lượng</th>
+                  <th>Ngày đặt</th>
+                  <th>Tổng tiền</th>
+                  <th>Xem chi tiết</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="admin : ${orderAdmins}">
+                  <td th:text="${admin.id}"></td>
+                  <td th:text="${admin.countOrder}"></td>
+                  <td th:text="${admin.date}"></td>
+                  <td th:inline="text">[[${#numbers.formatDecimal(admin.total, 0, 'COMMA', 0, 'POINT')}]]₫</td>
+                  <td>
+                    <a th:href="@{/history/view(orderId=${admin.id})}" class="btn btn-outline-warning"><i class="bi bi-eye"></i></a>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- End Table with stripped rows -->
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+  <footer th:insert="index.html :: footer"></footer>
+
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+<div th:insert="index.html :: script"></div>
+</body>
+
+</html>

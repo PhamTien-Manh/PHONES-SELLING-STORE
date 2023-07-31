@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:insert="index.html :: head"></head>
+<head>
+  <style>
+    th:hover {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ======= Header ======= -->
+<header th:insert="index.html :: header"></header>
+
+<!-- ======= Sidebar ======= -->
+<aside th:insert="index.html :: aside"></aside>
+
+  <main id="main" class="main">
+
+    <div class="pagetitle">
+      <h1>Đơn hàng</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="../index.html">Quản lý</a></li>
+          <li class="breadcrumb-item active">Đơn hàng</li>
+        </ol>
+      </nav>
+    </div><!-- End Page Title -->
+
+    <section class="section profile">
+      <div class="row container">
+        <div class="col-lg-12" th:if="${orderDetails != null}">
+          <div class="card">
+            <div class="card-body m-2">
+              <table class="table table-hover table-borderless">
+                <center>
+                  <h4><i><u>Thông tin đơn hàng: <span th:text="${id}"></span></u></i></h4>
+                  <h4><strong class="text-primary pt-3" th:text="${message}"></strong></h4>
+                </center>
+                <thead>
+                <tr>
+                  <th>Tên sản phẩm</th>
+                  <th>Thể loại</th>
+                  <th>Đơn giá</th>
+                  <th>Số lượng</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="order : ${orderDetails}">
+                  <td th:text="${order.product.name}"></td>
+                  <td th:text="${order.product.category.name}"></td>
+                  <td th:inline="text">[[${#numbers.formatDecimal(order.unitPrice, 0, 'COMMA', 0, 'POINT')}]]₫</td>
+                  <td th:text="${order.quantity}"></td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- End Table with stripped rows -->
+          </div>
+        </div>
+        <div class="col-lg-12">
+          <div class="card">
+            <div class="card-body m-2">
+              <table id="orderTable" class="table table-hover table-striped">
+                <thead>
+                <tr>
+                  <th onclick="sortTable(0)">
+                    <a>ID<i class="bi bi-arrow-up"></i></a>
+                  </th>
+                  <th onclick="sortTable(1)">
+                    <a>Số lượng mặt hàng<i class="bi bi-arrow-up"></i></a>
+                  </th>
+                  <th onclick="sortTable(2)">
+                    <a>Khách hàng<i class="bi bi-arrow-up"></i></a>
+                  </th>
+                  <th onclick="sortTable(3)">
+                    <a>Ngày đặt<i class="bi bi-arrow-up"></i></a>
+                  </th>
+                  <th onclick="sortTable(4)">
+                    <a>Tổng tiền<i class="bi bi-arrow-up"></i></a>
+                  </th>
+                  <th>Khác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="admin : ${orderAdmins}">
+                  <td th:text="${admin.id}"></td>
+                  <td th:text="${admin.countOrder}"></td>
+                  <td th:text="${admin.customer}"></td>
+                  <td th:text="${admin.date}"></td>
+                  <td th:inline="text">[[${#numbers.formatDecimal(admin.total, 0, 'COMMA', 0, 'POINT')}]]₫</td>
+                  <td>
+                    <a th:href="@{/admin/orders/view(id=${admin.id})}" class="btn btn-outline-warning"><i class="bi bi-eye"></i></a>
+                    <a th:href="@{/admin/orders/delete(id=${admin.id})}" class="btn btn-outline-danger"><i class="bi bi-trash3"></i></a>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- End Table with stripped rows -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+<footer th:insert="index.html :: footer"></footer>
+
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script th:src="@{~/assets/vendor/apexcharts/apexcharts.min.js}"></script>
+  <script th:src="@{~/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+  <script th:src="@{~/assets/vendor/chart.js/chart.umd.js}"></script>
+  <script th:src="@{~/assets/vendor/echarts/echarts.min.js}"></script>
+  <script th:src="@{~/assets/vendor/quill/quill.min.js}"></script>
+  <script th:src="@{~/assets/vendor/simple-datatables/simple-datatables.js}"></script>
+  <script th:src="@{~/assets/vendor/tinymce/tinymce.min.js}"></script>
+  <script th:src="@{~/assets/vendor/php-email-form/validate.js}"></script>
+
+  <!-- Template Main JS File -->
+  <script th:src="@{~/assets/js/main.js}"></script>
+
+<!--Upload file-->
+<script>
+  function sortTable(column) {
+    var table, rows, switching, i, x, y, shouldSwitch;
+    table = document.getElementById("orderTable");
+    switching = true;
+    while (switching) {
+      switching = false;
+      rows = table.rows;
+      for (i = 1; i < (rows.length - 1); i++) {
+        shouldSwitch = false;
+        x = rows[i].getElementsByTagName("td")[column];
+        y = rows[i + 1].getElementsByTagName("td")[column];
+        if (column === 4) {
+          // Sắp xếp cột "Tổng tiền" theo giá trị số
+          var xValue = parseInt(x.innerHTML.replace(/[^0-9]/g, ''));
+          var yValue = parseInt(y.innerHTML.replace(/[^0-9]/g, ''));
+          if (xValue > yValue) {
+            shouldSwitch = true;
+            break;
+          }
+        } else {
+          // Sắp xếp các cột khác theo giá trị chữ cái
+          if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+            shouldSwitch = true;
+            break;
+          }
+        }
+      }
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+      }
+    }
+  }
+</script>
+</body>
+
+</html>

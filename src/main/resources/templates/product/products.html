@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:insert="index.html :: head"></head>
+<body>
+
+<!-- ======= Header ======= -->
+<header th:insert="index.html :: header"></header>
+
+<!-- ======= Sidebar ======= -->
+<aside th:insert="index.html :: aside"></aside>
+
+  <main id="main" class="main">
+
+    <div class="pagetitle">
+      <h1 th:text="${category.name}"></h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a th:href="@{~/index}">Home</a></li>
+          <li class="breadcrumb-item active" th:text="${category.name}"></li>
+        </ol>
+      </nav>
+    </div><!-- End Page Title -->
+
+
+    <section class="section dashboard">
+      <div class="row">
+        <div class="row col-12" th:if="${product != null}">
+          <div class="col-1"></div>
+          <div class="col-lg-5 mt-3">
+            <center>
+              <img class="card p-4" th:src="${product.image != null ? '/products/images/' + product.image : '' }" width="90%">
+            </center>
+          </div>
+          <div class="col-lg-5 card m-3 p-3">
+            <form action="">
+              <h3 class="card-title text-center border-bottom">Thông tin chi tiết</h3>
+              <div>
+                <strong>Tên sản phẩm: </strong><span th:text="${product.name}"></span> <br>
+                <strong>Đơn giá: <span class="text-danger" th:inline="text">[[${#numbers.formatDecimal(product.unitPrice / 100 * (100 - product.discount), 0, 'COMMA', 0, 'POINT')}]]₫</span></strong>
+                <br>
+                <strong>Thông tin cấu hình:</strong>
+                <p th:text="${product.description}"></p>
+              </div>
+              <hr>
+              <strong><i class="bi bi-coin"></i> Online giá rẻ</strong>
+              <ul class="bg-light rounded m-2">
+                Điều kiện áp dụng:
+                <li>Giao hàng nhanh chóng (tuỳ khu vực)</li>
+                <li>Mỗi số điện thoại chỉ mua 3 sản phẩm trong 1 tháng</li>
+                <li>Giá và khuyến mãi có thể kết thúc sớm</li>
+              </ul>
+              <a th:href="@{~/cart/add(id=${product.productId})}" class="col-12 btn btn-danger m-2">
+                <i class="bi bi-gift"></i>
+                Đặt hàng ngay. Nhận ưu đãi!!!
+              </a>
+            </form>
+          </div>
+          <hr>
+        </div>
+        <!-- Sales Card -->
+        <div class="card col-3 info-card sales-card m-3" th:each="pro : ${products}">
+          <a th:href="@{~/products/detail(category=${category.categoryId},id=${pro.productId})}">
+            <div class="card-header">
+              <small class="bg-light text-dark rounded p-1 w-25" >Trả góp 0%</small>
+            </div>
+            <div class="card-body mt-3">
+            <div class="card-body mt-3">
+             <center>
+               <img th:src="${pro.image != null ? '/products/images/' + pro.image : '' }"
+                    class="rounded" width="75%">
+             </center>
+            </div>
+            </div>
+            <div class="card-footer">
+              <h5 class="card-title" >
+                <div th:text="${pro.name}"></div>
+                <span th:if="${pro.discount > 0}"><del th:inline="text">[[${#numbers.formatDecimal(pro.unitPrice, 0, 'COMMA', 0, 'POINT')}]]</del>₫ -<span th:text="${pro.discount} + '%'"></span></span>
+                <div>
+                  <span class="text-danger" th:inline="text">[[${#numbers.formatDecimal(pro.unitPrice / 100 * (100 - pro.discount), 0, 'COMMA', 0, 'POINT')}]]₫</span>
+                </div>
+              </h5>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+            </div>
+          </a>
+        </div>
+        <!-- End Sales Card -->
+      </div>
+    </section>
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+  <footer th:insert="index.html :: footer"></footer>
+
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+<div th:insert="index.html :: script"></div>
+</body>
+
+</html>

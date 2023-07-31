@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:insert="index.html :: head"></head>
+<body>
+
+<!-- ======= Header ======= -->
+<header th:insert="index.html :: header"></header>
+
+<!-- ======= Sidebar ======= -->
+<aside th:insert="index.html :: aside"></aside>
+
+  <main id="main" class="main">
+
+    <div class="pagetitle">
+      <h1>Người dùng</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="../index.html">Quản lý</a></li>
+          <li class="breadcrumb-item active">Người dùng</li>
+        </ol>
+      </nav>
+    </div><!-- End Page Title -->
+
+    <section class="section profile">
+      <div class="row container">
+        <div class="col-lg-12">
+          <div class="card p-3">
+            <form class="border-bottom row" action="/admin/customers/search" method="post">
+              <div class="col-lg-7 p-3">
+                <input class="form-control" type="text" placeholder="Search by name" th:value="${keyword}" name="keyword">
+              </div>
+                <button class="btn col-xl-2 btn-secondary mt-3 mb-3">Search</button>
+            </form>
+            <form action="/admin/customers/update-or-create" th:object="${customer}" class="row m-4" method="post">
+              <input type="hidden" th:field="*{customerId}">
+              <div class="col-lg-6 form-group p-2">
+                <strong>Email:</strong>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">@</span>
+                  </div>
+                  <input class="form-control" aria-describedby="basic-addon1" th:field="*{email}" type="email" placeholder="Email">
+                </div>
+                <small class="text-danger mb-1 col-12" th:errors="*{email}"></small>
+              </div>
+              <div class="col-lg-6 form-group p-2">
+                <strong>Name:</strong>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon2">
+                      <i class="bi bi-person"></i>
+                    </span>
+                  </div>
+                  <input class="form-control" aria-describedby="basic-addon2" th:field="*{name}" type="text" placeholder="Username">
+                </div>
+                <small class="text-danger mb-1 col-12" th:errors="*{name}"></small>
+              </div>
+              <div class="col-lg-6 form-group p-2">
+                <strong>Password:</strong>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon3">
+                      <i class="bi bi-braces-asterisk"></i>
+                    </span>
+                  </div>
+                  <input class="form-control" aria-describedby="basic-addon3" th:field="*{password}" type="text" placeholder="Password">
+                </div>
+                <small class="text-danger mb-1 col-12" th:errors="*{password}"></small>
+              </div>
+              <div class="col-lg-6 form-group p-2">
+                <strong>Phone:</strong>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon4">
+                      <i class="bi bi-telephone-fill"></i>
+                    </span>
+                  </div>
+                <input class="form-control" aria-describedby="basic-addon3" th:field="*{phone}" type="text" placeholder="Phone number">
+                </div>
+                <small class="text-danger mb-1 col-12" th:errors="*{phone}"></small>
+              </div>
+              <div class="col-lg-6 form-group p-2">
+                <strong>Role:</strong> <br>
+                <input class="form-check-input" th:field="*{status}" value="0" name="status" type="radio"> Customer
+                <input class="form-check-input" th:field="*{status}" value="1" name="status" type="radio"> Admin
+              </div>
+              <div class="col-lg-6 p-2 mt-2 row">
+                <button class="btn btn-success col-3">Submit</button>
+                <h5 class="text-primary col pt-1"><strong th:text="${message}"></strong></h5>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="col-lg-12">
+          <div class="card">
+            <div class="card-body m-2">
+              <table class="table table-hover table-striped">
+                <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Name</th>
+                  <th>Password</th>
+                  <th>Phone</th>
+                  <th>Status</th>
+                  <th>Control</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="customer : ${customers}">
+                  <td th:text="${customer.email}"></td>
+                  <td th:text="${customer.name}"></td>
+                  <td th:text="${customer.password}"></td>
+                  <td th:text="${customer.phone}"></td>
+                  <td th:text="${customer.status == 1 ? 'Admin' : 'Customer'}"></td>
+                  <td>
+                    <a th:href="@{/admin/customers/edit(id=${customer.customerId}, page=${customers.number})}" class="btn btn-outline-success"><i class="bi bi-pencil-fill"></i></a>
+                    <a th:href="@{/admin/customers/delete(id=${customer.customerId})}" class="btn btn-outline-danger"><i class="bi bi-trash3"></i></a>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+              <a class="btn btn-dark" th:href="@{/admin/customers(page=0,keyword=${keyword})}">&laquo;</a>
+              <!--  Toán tử 3 ngôi: nếu page = -1 thì trả lại page = 0 và ngược lại lớn hơn tổng số trang thì trả về trang lớn nhất-->
+              <a class="btn btn-dark" th:href="@{/admin/customers
+      (page=${customers.number - 1 < 0 ? 0 : customers.number - 1},keyword=${keyword})}">Prev</a>
+              <a class="btn btn-dark" th:href="@{/admin/customers
+      (page=${customers.number + 1 > customers.totalPages - 1 ? customers.totalPages - 1 : customers.number + 1},keyword=${keyword})}">Next</a>
+              <a class="btn btn-dark" th:href="@{/admin/customers(page=${customers.totalPages - 1},keyword=${keyword})}">&raquo</a>
+            </div>
+              <!-- End Table with stripped rows -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+<footer th:insert="index.html :: footer"></footer>
+
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script th:src="@{~/assets/vendor/apexcharts/apexcharts.min.js}"></script>
+  <script th:src="@{~/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+  <script th:src="@{~/assets/vendor/chart.js/chart.umd.js}"></script>
+  <script th:src="@{~/assets/vendor/echarts/echarts.min.js}"></script>
+  <script th:src="@{~/assets/vendor/quill/quill.min.js}"></script>
+  <script th:src="@{~/assets/vendor/simple-datatables/simple-datatables.js}"></script>
+  <script th:src="@{~/assets/vendor/tinymce/tinymce.min.js}"></script>
+  <script th:src="@{~/assets/vendor/php-email-form/validate.js}"></script>
+
+  <!-- Template Main JS File -->
+  <script th:src="@{~/assets/js/main.js}"></script>
+
+</body>
+
+</html>
