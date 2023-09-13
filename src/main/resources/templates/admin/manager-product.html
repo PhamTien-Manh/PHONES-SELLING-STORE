@@ -67,7 +67,7 @@
               <div class="col-lg-6 form-group p-2">
                 <strong>Image:</strong>
                 <img th:src="${product.image != null ? '/admin/products/images/' + product.image : '' }"
-                     id="imagePreview" class="rounded" width="40%">
+                     id="imagePreview" class="rounded" width="40%" height="40%">
                 <input class="form-control mt-2" onchange="displayImage()" id="myFile" name="imageFile" type="file">
               </div>
               <div class="col-lg-12 form-group p-2">

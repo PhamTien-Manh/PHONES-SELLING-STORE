@@ -1,13 +1,20 @@
 package com.asm.java5.domain;
 
+import com.asm.java5.enums.Provider;
+import com.asm.java5.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -15,7 +22,7 @@ import java.util.Set;
 @Data
 @Entity
 @Table(name = "customers")
-public class Customer implements Serializable {
+public class Customer implements Serializable, UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int customerId;
@@ -24,26 +31,71 @@ public class Customer implements Serializable {
     @NotBlank(message = "*Vui lòng nhập tên người dùng")
     private String name;
 
-    @Column(columnDefinition = "nvarchar(100) not null")
+    @Column(columnDefinition = "nvarchar(100) not null", unique = true)
     @NotEmpty(message = "*Không để trống email")
     @Email
     private String email;
 
     @Column(length = 20, nullable = false)
-    @Size(max = 20, message = "*Mật khẩu tối đa 20 kí tự")
+    @Size(max = 255, message = "*Mật khẩu tối đa 255 kí tự")
     @NotBlank(message = "*Vui lòng nhập mật khẩu")
     private String password;
 
-
     @Column(length = 20)
-    @Size(max = 10, min = 10, message = "*Số điện thoại chỉ nhận 10 số")
-    @NotBlank(message = "*Vui lòng nhập số điện thoại")
     private String phone;
+
     @Temporal(TemporalType.DATE)
     private Date registeredDate;
-    @Column(nullable = false)
-    private short status;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+    @Column(length = 200)
+    private String image;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.CUSTOMER;
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     private Set<Order> orders;
+
+    @Enumerated(EnumType.STRING)
+    private Provider provider;
+
+    public Provider getProvider() {
+        return provider;
+    }
+
+    public void setProvider(Provider provider) {
+        this.provider = provider;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        SimpleGrantedAuthority simple = new SimpleGrantedAuthority(role.name());
+        return List.of(simple);
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

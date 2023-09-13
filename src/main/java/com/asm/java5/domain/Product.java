@@ -32,7 +32,7 @@ public class Product implements Serializable {
     @Column(nullable = false)
     @NumberFormat(style = NumberFormat.Style.CURRENCY)
     @Positive(message = "*Đơn giá phải là số nguyên dương")
-    private double unitPrice;
+            private double unitPrice;
 
     @Transient
     public String getUnitPriceSt(){

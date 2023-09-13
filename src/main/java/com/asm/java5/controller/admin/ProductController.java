@@ -2,12 +2,10 @@ package com.asm.java5.controller.admin;
 
 
 import com.asm.java5.domain.Category;
-import com.asm.java5.domain.Customer;
 import com.asm.java5.domain.Product;
 import com.asm.java5.repository.CategoryRepository;
 import com.asm.java5.repository.ProductRepository;
 import com.asm.java5.service.StorageService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -21,6 +19,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.validation.Valid;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -63,7 +62,7 @@ public class ProductController {
     }
     @GetMapping("delete")
     public String delete(@RequestParam("id") Integer id, Model model){
-        productRepository.deleteById(id);
+        productRepository.findAllByCategoryCategoryId(id);
         model.addAttribute("message", "Xóa thành công!");
         return "forward:/admin/products";
     }
@@ -76,6 +75,7 @@ public class ProductController {
     @PostMapping("update-or-create")
     public String save(Model model, @Valid @ModelAttribute("product") Product product,
             BindingResult result, @RequestParam("imageFile") MultipartFile imageFile) {
+        String oldImage = product.getImage();
         if(result.hasErrors()){
             return "admin/manager-product";
         }
@@ -84,9 +84,15 @@ public class ProductController {
             UUID uuid = UUID.randomUUID();
             String uuString = uuid.toString();
             product.setImage(storageService.getStoredFilename(imageFile, uuString));
-            storageService.store(imageFile, product.getImage());
         }
         productRepository.save(product);
+        try {
+            storageService.store(imageFile, product.getImage());
+            storageService.delete(oldImage);
+
+        } catch (Exception e){
+            e.printStackTrace();
+        }
         save = true;
         return "redirect:/admin/products";
     }

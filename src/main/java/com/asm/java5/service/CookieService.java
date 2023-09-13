@@ -1,20 +1,28 @@
 package com.asm.java5.service;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.asm.java5.constant.SessionAttr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.CookieValue;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+
 @Service
 public class CookieService {
+    @Autowired
+    HttpServletResponse response;
+    @Autowired
+    HttpServletRequest request;
     /**
      * Đọc cookie từ request
      * @param name tên cookie cần đọc
      * @return đối tượng cookie đọc được hoặc null nếu không tồn tại
      */
-    public Cookie get(HttpServletRequest request, String name) {
+    public Cookie get(String name) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null){
             for(Cookie cookie: cookies){
@@ -41,7 +49,7 @@ public class CookieService {
 //     * @param days thời hạn (ngày)
      * @return đối tượng cookie đã tạo
      */
-    public Cookie add(String name, String value, int days, HttpServletResponse response) {
+    public Cookie add(String name, String value, int days) {
         Cookie cookie = new Cookie(name, value);
         cookie.setMaxAge(days * 60 * 60);
         cookie.setPath("/");
@@ -52,17 +60,15 @@ public class CookieService {
      * Xóa cookie khỏi client
      * @param name tên cookie cần xóa
      */
-    public void remove(String name, HttpServletRequest request, HttpServletResponse response) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null){
-            for(Cookie cookie: cookies){
-                if(cookie.getName().equals(name)) {
-                    cookie.setMaxAge(0);
-                    cookie.setValue("");
-                    response.addCookie(cookie);
-                }
-            }
-        }
+    public void remove(String name) {
+        Cookie cookie = new Cookie(name, null);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
     }
 
+    public void exception(String error, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        remove(SessionAttr.CUSTOMER);
+        request.getSession().setAttribute("loginError", error);
+        response.sendRedirect("/login");
+    }
 }

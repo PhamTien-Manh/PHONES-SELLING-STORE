@@ -22,36 +22,41 @@
 
                 <div class="card-body">
 
-                  <div class="pt-4 pb-2">
-                    <h5 class="card-title text-center pb-0 fs-4">Login to Your Account</h5>
-                    <p class="text-center small">Enter your email & password to login</p>
+                  <div class="text-center pt-4 pb-2">
+                    <h5 class="card-title pb-0 fs-4">Login to Your Account</h5>
+                    <p class="small">Enter your email & password to login </p>
+                      <p class="small text-danger" th:text="${session.loginError}" th:if="${session.loginError != null}"></p>
                   </div>
-                  <form class="row g-3 needs-validation" action="/login" novalidate method="post">
+                  <form class="row g-3 needs-validation" novalidate method="post">
 
                     <div class="col-12">
                       <label for="yourUsername" class="form-label">Email</label>
                       <div class="input-group">
                         <span class="input-group-text" id="inputGroupPrepend">@</span>
-                        <input type="email" name="email" class="form-control" th:value="${email}" id="yourUsername" required>
+                        <input type="email" name="email" class="form-control" id="yourUsername" required>
                       </div>
                     </div>
 
                     <div class="col-12">
                       <label for="yourPassword" class="form-label">Password</label>
-                      <input type="password" name="password" th:value="${password}" class="form-control" id="yourPassword" required>
+                      <input type="password" name="password" class="form-control" id="yourPassword" required>
                     </div>
 
                     <div class="col-8">
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="remember" th:checked="${remember}">
-                        <label class="form-check-label">Remember me</label>
-                      </div>
+<!--                      <div class="form-check">-->
+<!--                      <input class="form-check-input" type="checkbox" name="remember" th:checked="${remember}">&ndash;&gt;-->
+<!--                        <label class="form-check-label">Remember me</label>-->
+<!--                      </div>-->
                     </div>
                     <div class="col-4">
                       <small class="icon small">
                         Or
-                        <a href=""><img th:src="@{~/assets/img/icon-facebook.png}" width="27%" alt="Facebook"></a>
-                        <a href=""><img th:src="@{~/assets/img/icon-google.png}" width="27%" alt="Google"></a>
+                        <a th:href="@{/oauth2/authorization/facebook}">
+                          <img th:src="@{~/assets/img/icon-facebook.png}" width="27%" alt="Facebook">
+                        </a>
+                        <a th:href="@{/oauth2/authorization/google}">
+                          <img th:src="@{~/assets/img/icon-google.png}" width="27%" alt="Google">
+                        </a>
                       </small>
                     </div>
                     <div class="col-12">

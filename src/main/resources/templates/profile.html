@@ -9,7 +9,7 @@
 <!-- ======= Sidebar ======= -->
 <aside th:insert="index.html :: aside"></aside>
 
-  <main id="main" class="main">
+  <main ng-controller="profile" id="main" class="main">
 
     <div class="pagetitle">
       <h1>Profile</h1>
@@ -28,10 +28,28 @@
 
           <div class="card">
             <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
+              <div class="position-relative" >
+                <form id="profile-form" method="post" action="/profile/upload-profile" enctype="multipart/form-data">
+                  <label for="profile-image">
+                    <img id="profile-img" style="max-width: 200px; max-height: 200px"
+                         th:src="${customer.image != null ? '/profile/images/' + customer.image : '/assets/img/profile.png' }"
+                         alt="Profile" class="rounded-circle">
+                    <i class="bi bi-pencil-fill position-absolute top-0 end-0"></i>
+                  </label>
+                  <input type="file" id="profile-image" name="imageFile" style="display: none;">
+                </form>
+              </div>
 
-              <img th:src="@{~/assets/img/profile.png}" alt="Profile" class="rounded-circle">
+              <script>
+                document.getElementById('profile-image').onchange = function() {
+                  document.getElementById('profile-form').submit();
+                };
+              </script>
+
+
+              <!--              <img th:src="@{~/assets/img/profile.png}" alt="Profile" class="rounded-circle">-->
               <h2 th:text="${customer.name}"></h2>
-              <h3 th:text="${customer.status == 0 ? 'Khách hàng' : 'Quản lý'}"></h3>
+              <h3 th:text="${customer.role.name() == 'CUSTOMER' ? 'Khách hàng' : 'Quản lý'}"></h3>
               <div class="social-links mt-2">
                 <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
                 <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
@@ -158,6 +176,23 @@
 
   <!-- Vendor JS Files -->
   <div th:insert="index.html :: script"></div>
+
+<script>
+  document.getElementById("profile-image").addEventListener("change", function(event) {
+    var form = document.getElementById("profile-form");
+    var formData = new FormData(form);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "profile/upload-profile");
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        // Xử lý phản hồi từ server (nếu cần)
+      }
+    };
+    xhr.send(formData);
+  });
+</script>
+
 
 </body>
 

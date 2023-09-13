@@ -6,6 +6,7 @@ import com.asm.java5.repository.CustomerRepository;
 import com.asm.java5.service.MailerService;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +22,8 @@ public class ForgotPassController {
     MailerService mailerService;
     @Autowired
     CustomerRepository customerRepository;
+    @Autowired
+    PasswordEncoder encoder;
 
     @GetMapping("forgot-pass")
     public String forgotPass(){
@@ -35,11 +38,11 @@ public class ForgotPassController {
             return "pages/pages-forgot-pass";
         }
         int randomNumber = ThreadLocalRandom.current().nextInt(1000, 10000);
-        customer.setPassword(String.valueOf(randomNumber));
+        customer.setPassword(encoder.encode(String.valueOf(randomNumber)));
         customerRepository.save(customer);
         mailerService.send(customer.getEmail(), SessionAttr.SUBJECT_FORGOT_PASS,
-                "Chào " + customer.getName() + ", " + SessionAttr.BODY_FORGOT_PASS + customer.getPassword());
-        model.addAttribute("message", "Hãy kiểm tra mail của bạn");
-        return "pages/pages-login";
+                "Chào " + customer.getName() + ", " + SessionAttr.BODY_FORGOT_PASS + randomNumber);
+        model.addAttribute("message", "Hãy kiểm tra email của bạn");
+        return "pages/pages-forgot-pass";
     }
 }

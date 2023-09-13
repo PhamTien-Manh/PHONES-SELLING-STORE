@@ -33,6 +33,7 @@
             </form>
             <form action="/admin/customers/update-or-create" th:object="${customer}" class="row m-4" method="post">
               <input type="hidden" th:field="*{customerId}">
+              <input type="hidden" th:field="*{image}">
               <div class="col-lg-6 form-group p-2">
                 <strong>Email:</strong>
                 <div class="input-group">
@@ -63,7 +64,7 @@
                       <i class="bi bi-braces-asterisk"></i>
                     </span>
                   </div>
-                  <input class="form-control" aria-describedby="basic-addon3" th:field="*{password}" type="text" placeholder="Password">
+                  <input class="form-control" aria-describedby="basic-addon3" th:field="*{password}" th:readonly="${edit}" placeholder="Password">
                 </div>
                 <small class="text-danger mb-1 col-12" th:errors="*{password}"></small>
               </div>
@@ -81,8 +82,8 @@
               </div>
               <div class="col-lg-6 form-group p-2">
                 <strong>Role:</strong> <br>
-                <input class="form-check-input" th:field="*{status}" value="0" name="status" type="radio"> Customer
-                <input class="form-check-input" th:field="*{status}" value="1" name="status" type="radio"> Admin
+                <input class="form-check-input" th:field="*{role}" value="CUSTOMER" name="role" type="radio"> Customer
+                <input class="form-check-input" th:field="*{role}" value="ADMIN" name="role" type="radio"> Admin
               </div>
               <div class="col-lg-6 p-2 mt-2 row">
                 <button class="btn btn-success col-3">Submit</button>
@@ -99,9 +100,8 @@
                 <tr>
                   <th>Email</th>
                   <th>Name</th>
-                  <th>Password</th>
                   <th>Phone</th>
-                  <th>Status</th>
+                  <th>Role</th>
                   <th>Control</th>
                 </tr>
                 </thead>
@@ -109,9 +109,8 @@
                 <tr th:each="customer : ${customers}">
                   <td th:text="${customer.email}"></td>
                   <td th:text="${customer.name}"></td>
-                  <td th:text="${customer.password}"></td>
                   <td th:text="${customer.phone}"></td>
-                  <td th:text="${customer.status == 1 ? 'Admin' : 'Customer'}"></td>
+                  <td th:text="${customer.role.name() == 'ADMIN' ? 'Admin' : 'Customer'}"></td>
                   <td>
                     <a th:href="@{/admin/customers/edit(id=${customer.customerId}, page=${customers.number})}" class="btn btn-outline-success"><i class="bi bi-pencil-fill"></i></a>
                     <a th:href="@{/admin/customers/delete(id=${customer.customerId})}" class="btn btn-outline-danger"><i class="bi bi-trash3"></i></a>

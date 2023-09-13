@@ -1,6 +1,5 @@
 package com.asm.java5.repository;
 
-import com.asm.java5.domain.Customer;
 import com.asm.java5.domain.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

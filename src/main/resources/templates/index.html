@@ -7,8 +7,11 @@
   <meta content="" name="keywords">
   <title>TmpShop</title>
   <!-- Favicons -->
-  <link th:href="@{~/assets/img/favicon.png}" rel="icon">
+  <link href="/assets/img/favicon.png" rel="icon">
   <link th:href="@{~/assets/img/apple-touch-icon.png}" rel="apple-touch-icon">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+
 
   <!-- Google Fonts -->
   <link href="https://fonts.gstatic.com" rel="preconnect">
@@ -28,14 +31,16 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
   <!-- Template Main CSS File -->
   <link th:href="@{~/assets/css/style.css}" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
+
 </head>
 
-<body>
+<body ng-app="java6" ng-controller="home">
 
   <!-- ======= Header ======= -->
   <header th:fragment="header" id="header" class="header fixed-top d-flex align-items-center">
     <div class="d-flex align-items-center justify-content-between">
-      <a href="index" class="logo d-flex align-items-center ">
+      <a href="/index.html" class="logo d-flex align-items-center ">
         <img th:src="@{~/assets/img/logo.png}" alt="">
         <span class="d-none d-lg-block">TmpShop</span>
       </a>
@@ -58,7 +63,7 @@
           </a>
         </li><!-- End Search Icon-->
 
-        <li class="nav-item" th:if="${user != null && user.status == 0}">
+        <li class="nav-item" th:if="${user != null && user.role.name() == 'CUSTOMER'}">
 
           <a class="nav-link nav-icon" th:href="@{/cart}">
             <i class="bi bi-cart3"></i>
@@ -132,14 +137,18 @@
         <li class="nav-item dropdown pe-3">
 
           <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-            <img th:src="@{~/assets/img/profile.png}" alt="" srcset="">
+<!--         Kiểm tra nếu chưa đăng nhập thực hiện unless ngược lại thực hiện if-->
+            <img id="profile-img" th:if="${user != null}" style="max-width: 35px; max-height: 35px"
+                 th:src="${user.image != null ?  '/index/images/' + user.image : '/assets/img/profile.png'}"
+                 alt="Profile" class="rounded-circle">
+            <img th:src="@{~/assets/img/profile.png}" th:unless="${user != null}" alt="" srcset="">
             <span class="d-none d-md-block dropdown-toggle ps-2" th:if="${user != null}" th:text="${user.name}"></span>
           </a><!-- End Profile Iamge Icon -->
 
           <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
             <li th:if="${user != null}" class="dropdown-header">
               <h6 th:text="${user.name}"></h6>
-              <span th:text="${user.status == 0 ? 'Khách hàng' : 'Quản lý'}"></span>
+              <span th:text="${user.role.name() == 'CUSTOMER' ? 'Khách hàng' : 'Quản lý'}"></span>
             </li>
             <li th:if="${user != null}">
               <hr class="dropdown-divider">
@@ -181,9 +190,9 @@
             </li>
 
             <li th:if="${user != null}">
-              <a class="dropdown-item d-flex align-items-center" th:href="@{~/logout}">
+              <a class="dropdown-item d-flex align-items-center" href="/auth/logoff">
                 <i class="bi bi-box-arrow-right"></i>
-                <span>Sign Out</span>
+                <span>Log Out</span>
               </a>
             </li>
 
@@ -212,7 +221,7 @@
         </a>
         <ul id="components-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li th:each="category, i : ${categories}">
-            <a th:href="@{~/products(category=${category.categoryId})}">
+            <a th:href="@{/index(category=${category.categoryId})}">
               <i class="bi bi-circle"></i><span th:text="${category .name}"></span>
             </a>
             <th:block th:if="${i.index %3 == 2}">
@@ -231,14 +240,14 @@
         </a>
       </li><!-- End Profile Page Nav -->
 
-      <li th:if="${user != null && user.status == 0}" class="nav-item">
+      <li th:if="${user != null && user.role.name() == 'CUSTOMER'}" class="nav-item">
         <a class="nav-link collapsed" th:href="@{~/cart}">
           <i class="bi bi-cart3"></i>
           <span>Giỏ hàng</span>
         </a>
       </li><!-- End Profile Page Nav -->
 
-      <li th:if="${user != null && user.status == 0}" class="nav-item">
+      <li th:if="${user != null && user.role.name() == 'CUSTOMER'}" class="nav-item">
         <a class="nav-link collapsed" th:href="@{~/history}">
           <i class="bi bi-journal-text"></i>
           <span>Lịch sử</span>
@@ -259,9 +268,9 @@
         </a>
       </li><!-- End Contact Page Nav -->
 
-      <li class="nav-heading" th:if="${user != null && user.status == 1 }">Admin</li>
+      <li class="nav-heading" th:if="${user != null && user.role.name() == 'ADMIN' }">Admin</li>
 
-      <li th:if="${user != null && user.status == 1 }" class="nav-item">
+      <li th:if="${user != null && user.role.name() == 'ADMIN' }" class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#admin-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-gear-wide-connected"></i>Quản lý</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
@@ -304,22 +313,22 @@
 
     <section class="section dashboard">
       <div class="row">
-        <div class="row col-12" th:if="${product != null}">
+        <div class="row col-12" ng-if="productDetail != null">
           <div class="col-1"></div>
           <div class="col-lg-5 mt-3">
             <center>
-              <img class="card p-4" th:src="${product.image != null ? '/index/images/' + product.image : '' }" width="90%">
+              <img class="card p-4" ng-src="{{ productDetail.image != null ? '/index/images/' + productDetail.image : '' }}" width="90%">
             </center>
           </div>
           <div class="col-lg-5 card m-3 p-3">
             <form action="">
               <h3 class="card-title text-center border-bottom">Thông tin chi tiết</h3>
               <div>
-                <strong>Tên sản phẩm: </strong><span th:text="${product.name}"></span> <br>
-                <strong>Đơn giá: <span class="text-danger" th:inline="text">[[${#numbers.formatDecimal(product.unitPrice / 100 * (100 - product.discount) , 0, 'COMMA', 0, 'POINT')}]]₫</span></strong>
+                <strong>Tên sản phẩm: </strong><span ng-bind="productDetail.name"></span> <br>
+                <strong>Đơn giá: <span class="text-danger">{{ (productDetail.unitPrice / 100 * (100 - productDetail.discount)) | number:0 }}₫</span></strong>
                 <br>
                 <strong>Thông tin cấu hình:</strong>
-                <p th:text="${product.description}"></p>
+                <p ng-bind="productDetail.description"></p>
               </div>
               <hr>
               <strong><i class="bi bi-coin"></i> Online giá rẻ</strong>
@@ -329,8 +338,7 @@
                 <li>Mỗi số điện thoại chỉ mua 3 sản phẩm trong 1 tháng</li>
                 <li>Giá và khuyến mãi có thể kết thúc sớm</li>
               </ul>
-              <a th:href="@{~/cart/add(id=${product.productId})}" class="col-12 btn btn-danger m-2">
-                <i class="bi bi-gift"></i>
+              <a ng-href="/cart/add?id={{productDetail.productId}}" class="col-12 btn btn-danger m-2">                <i class="bi bi-gift"></i>
                 Đặt hàng ngay. Nhận ưu đãi!!!
               </a>
             </form>
@@ -339,25 +347,25 @@
         </div>
 
         <!-- Sales Card -->
-        <div class="card col-3 info-card sales-card m-3" th:each="pro : ${products}">
-          <a th:href="@{~/index/detail(id=${pro.productId})}">
+        <div class="card col-3 info-card sales-card m-3" ng-repeat="product in items">
+          <a href="#" ng-click="goToDetail(product.productId)">
             <div class="card-header">
               <small class="bg-light text-dark rounded p-1 w-25" >Trả góp 0%</small>
             </div>
             <div class="card-body mt-3">
               <div class="card-body mt-3">
                 <center>
-                  <img th:src="${pro.image != null ? '/index/images/' + pro.image : '' }"
-                       class="rounded" width="75%">
+                 <img ng-src="{{ product.image ? '/index/images/' + product.image : '' }}"
+                  class="rounded" width="75%">
                 </center>
               </div>
             </div>
             <div class="card-footer">
               <h5 class="card-title" >
-                <div th:text="${pro.name}"></div>
-                <span><del th:inline="text">[[${#numbers.formatDecimal(pro.unitPrice, 0, 'COMMA', 0, 'POINT')}]]</del>₫ <span th:text="${'- ' + pro.discount + '%'}"></span></span>
-                <div>
-                  <span class="text-danger" th:inline="text">[[${#numbers.formatDecimal(pro.unitPrice / 100 * (100 - pro.discount), 0, 'COMMA', 0, 'POINT')}]]₫</span>
+                <div>{{product.name}}</div>
+                <span><del>{{ product.unitPrice | number:0 }}</del></span>₫ <span ng-bind="'- ' + product.discount + '%'"></span>
+                <div class="text-danger">
+                  {{ (product.unitPrice / 100 * (100 - product.discount)) | number:0 }}₫
                 </div>
               </h5>
               <i class="bi bi-star-fill"></i>
@@ -371,7 +379,6 @@
         <!-- End Sales Card -->
       </div>
     </section>
-
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
@@ -400,6 +407,7 @@
     <!-- Template Main JS File -->
     <script th:src="@{~/assets/js/main.js}"></script>
   </div>
+  <script th:src="@{~/assets/js/home.js}"></script>
 
 </body>
 

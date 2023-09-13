@@ -2,17 +2,19 @@ package com.asm.java5.controller.admin;
 
 import com.asm.java5.domain.Category;
 import com.asm.java5.domain.Customer;
+import com.asm.java5.enums.Role;
 import com.asm.java5.repository.CustomerRepository;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +24,9 @@ import java.util.Optional;
 public class CustomerController {
     @Autowired
     CustomerRepository customerRepository;
+    @Autowired
+    PasswordEncoder encoder;
+//    Để readonly true or false thẻ password
     @ModelAttribute("customers")
     public Page<Customer> getAll(@RequestParam("page") Optional<Integer> page
             , @RequestParam("keyword") Optional<String> keyword, Model model){
@@ -32,7 +37,11 @@ public class CustomerController {
     }
 
     @RequestMapping("")
-    public String list(@ModelAttribute("customer") Customer customer){
+    public String list(Model model){
+        Customer customer = new Customer();
+        customer.setRole(Role.CUSTOMER);
+        model.addAttribute("customer", customer);
+        model.addAttribute("edit", false);
         return "admin/manager-customer";
     }
     @GetMapping("delete")
@@ -45,6 +54,7 @@ public class CustomerController {
     public String edit(Model model, @RequestParam("id") Integer id){
         Customer customer = customerRepository.findById(id).get();
         model.addAttribute("customer", customer);
+        model.addAttribute("edit",true);
         return "admin/manager-customer";
     }
     @PostMapping("update-or-create")
@@ -53,9 +63,14 @@ public class CustomerController {
         if(result.hasErrors()){
             return "admin/manager-customer";
         }
-        customer.setRegisteredDate(new Date());
+        Customer customerNew = customerRepository.findById(customer.getCustomerId()).get();
+        if (customerNew == null){
+            customer.setPassword(encoder.encode(customer.getPassword()));
+            customer.setRegisteredDate(new Date());
+        }
         customerRepository.save(customer);
         model.addAttribute("message", "Lưu thành công!");
+        model.addAttribute("edit", false);
         return "forward:/admin/customers";
     }
     @PostMapping("search")

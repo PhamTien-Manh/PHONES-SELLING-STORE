@@ -16,9 +16,11 @@ public class GlobalControllerAdvice {
     @Autowired
     CategoryRepository categoryRepository;
     @Autowired
-    CustomerRepository customerRepository;
+    CookieService cookieService;
     @Autowired
     SessionService sessionService;
+    @Autowired
+    CustomerRepository customerRepository;
 
     @ModelAttribute("categories")
     public List<Category> getCategoriesUpAll() {
@@ -26,11 +28,12 @@ public class GlobalControllerAdvice {
     }
     @ModelAttribute("user")
     public Customer getLoginUpAll(){
-        Customer customer = sessionService.get(SessionAttr.CUSTOMER);
-        if(customer != null){
-            sessionService.set(SessionAttr.CUSTOMER, customer);
-            return customer;
+        var email = cookieService.get(SessionAttr.CUSTOMER);
+        if (email == null){
+            return null;
         }
-        return null;
+        Customer customer = customerRepository.findByEmail(email.getValue());
+        sessionService.set(SessionAttr.CUSTOMER,customer);
+        return customer;
     }
 }

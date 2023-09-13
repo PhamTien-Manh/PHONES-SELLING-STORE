@@ -3,7 +3,6 @@ package com.asm.java5.restcontroller;
 import com.asm.java5.domain.Category;
 import com.asm.java5.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

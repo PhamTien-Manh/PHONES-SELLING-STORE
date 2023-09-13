@@ -1,8 +1,13 @@
 package com.asm.java5.service;
 
+import com.asm.java5.constant.SessionAttr;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 @Service
 public class SessionService {
@@ -37,4 +42,7 @@ public class SessionService {
     public void remove(String name) {
         session.removeAttribute(name);
     }
+    /** Bắn lỗi và xóa khỏi session
+     *
+     */
 }

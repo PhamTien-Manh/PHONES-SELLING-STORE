@@ -5,16 +5,23 @@ import com.asm.java5.domain.Customer;
 import com.asm.java5.domain.Product;
 import com.asm.java5.repository.CustomerRepository;
 import com.asm.java5.service.SessionService;
+import com.asm.java5.service.StorageService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.util.Date;
+import java.util.UUID;
+
 
 @Controller
 @RequestMapping("profile")
@@ -24,6 +31,10 @@ public class ProfileController {
     SessionService sessionService;
     @Autowired
     CustomerRepository customerRepository;
+    @Autowired
+    PasswordEncoder encoder;
+    @Autowired
+    StorageService storageService;
 
     @ModelAttribute("customer")
     public Customer getCustomer(){
@@ -42,12 +53,13 @@ public class ProfileController {
                              @RequestParam("renewpassword") String renewpass){
         Customer customer = customerRepository.findById(getCustomer().getCustomerId()).get();
         try{
-            if(!(customer.getPassword().equals(password))){
+            if (!encoder.matches(password, customer.getPassword())) {
                 model.addAttribute("messagePass", "*Mật khẩu cũ không chính xác");
-            } else if (!newpass.equals(renewpass)){
+            }
+            else if (!newpass.equals(renewpass)){
                 model.addAttribute("messagePass", "*Xác nhật mật khẩu không chính xác");
             } else {
-                customer.setPassword(newpass);
+                customer.setPassword(encoder.encode(newpass));
                 customerRepository.save(customer);
                 model.addAttribute("messagePass", "*Thay đổi thành công");
             }
@@ -77,6 +89,34 @@ public class ProfileController {
                 model.addAttribute("messageProfile", "*Vui lòng điền đầy đủ thông tin");
         }
         model.addAttribute("tab", "changeProfile");
-        return "forward:/profile";
+        return "profile";
+    }
+
+    @PostMapping("upload-profile")
+    public String save(Model model, @RequestParam("imageFile") MultipartFile imageFile) throws IOException {
+        Customer customer = sessionService.get(SessionAttr.CUSTOMER);
+        String oldImage = customer.getImage();
+        if (!imageFile.isEmpty()) {
+            UUID uuid = UUID.randomUUID();
+            String uuString = uuid.toString();
+            customer.setImage(storageService.getStoredFilename(imageFile, uuString));
+        }
+        customerRepository.save(customer);
+        try {
+            storageService.store(imageFile, customer.getImage());
+            storageService.delete(oldImage);
+
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return "redirect:/profile";
+    }
+
+    @GetMapping("/images/{filename:.+}")
+    @ResponseBody
+    public ResponseEntity<Resource> serveFile(@PathVariable String filename){
+        Resource file = storageService.loadAsResource(filename);
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
 }
